@@ -1,7 +1,7 @@
 {
-  "name": "mdn-search-doc",
+  "name": "search-docs",
   "version": "0.0.1",
-  "description": "Module permettant de chercher dans la doc MDN plus facilement",
+  "description": "Module permettant de chercher dans la doc MDN, Node.js et Discord.js plus facilement",
   "main": "lib/index.js",
   "types": "lib",
   "scripts": {
@@ -11,17 +11,20 @@
   },
   "keywords": [
     "mdn",
+    "NodeJS",
+    "discord.js",
+    "djs",
     "docs",
     "doc",
     "search"
   ],
   "author": "LACOSTAR91",
   "license": "CC BY-NC-SA 4.0",
+  "dependencies": {
+    "axios": "^0.27.2"
+  },
   "devDependencies": {
     "@types/node": "^18.0.0",
     "typescript": "^4.7.4"
-  },
-  "dependencies": {
-    "axios": "^0.27.2"
   }
 }

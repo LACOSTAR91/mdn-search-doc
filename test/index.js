@@ -1,4 +1,4 @@
-const { get, search } = require('../lib');
+const { mdn } = require('../lib');
 
 /**
  * @name search
@@ -7,7 +7,7 @@ const { get, search } = require('../lib');
  * @param {string | undefined} lang
  * @returns {Promise<string[]>}
  */
-console.log(search(`array`));
+console.log(mdn.search(`span`, "HTML"));
 
 /**
  * @name get
@@ -16,7 +16,7 @@ console.log(search(`array`));
  * @param {string | undefined} lang
  * @returns {Promise<any>}
  */
-get('array') 
+mdn.get('span', "HTML") 
 .then(data => {
     console.log(data);
 });

@@ -13,5 +13,8 @@ jobs:
         with:
           node-version: 16
 
+      - name: Install NPM Dependences
+        run: npm i -D
+
       - name: Build
         run: npm run build

@@ -7,7 +7,7 @@ const { mdn } = require('../lib');
  * @param {string | undefined} lang
  * @returns {Promise<string[]>}
  */
-console.log(mdn.search(`span`, "HTML"));
+console.log(mdn.search(`namespace`, { lang: "css" }));
 
 /**
  * @name get
@@ -16,7 +16,7 @@ console.log(mdn.search(`span`, "HTML"));
  * @param {string | undefined} lang
  * @returns {Promise<any>}
  */
-mdn.get('span', "HTML") 
+mdn.get('namespace', { lang: "css", trad: "fr" }) 
 .then(data => {
     console.log(data);
 });

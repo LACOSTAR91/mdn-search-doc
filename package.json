@@ -21,7 +21,9 @@
   "author": "LACOSTAR91",
   "license": "CC BY-NC-SA 4.0",
   "dependencies": {
-    "axios": "^0.27.2"
+    "axios": "^0.27.2",
+    "mkdirp-no-bin": "^0.5.1",
+    "rmdir": "^1.2.0"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",

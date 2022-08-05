@@ -10,6 +10,10 @@ lib/
 data.js
 .git
 test/cache
+src/djs
+src/djs/index.ts
+src/nodejs
+x.ts
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

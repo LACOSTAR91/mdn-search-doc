@@ -67,7 +67,7 @@ class MDN extends CacheManager {
                 const data = this.getSync(dataConstant);
                 if(!data) return resolve(this.fetchMdnJson(url, query, dataConstant));
                 else return resolve(data) 
-            } 
+            }
             else resolve(this.fetchMdnJson(url, query, dataConstant));
         });
     };

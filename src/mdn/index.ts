@@ -25,7 +25,7 @@ class MDN extends CacheManager {
     search(query: string, opts: MDNSearchOptions = { lang: "js" }) {
         let filtered: string[] = [];
         const List: string[] = opts?.lang?.toUpperCase() == "HTML" ? HTML_List : opts.lang?.toUpperCase() == "CSS" ? CSS_List : JS_List;
-        
+
         List.map((value: string) => {
             const [category, property, property2] = value.split("#");
             

@@ -1,4 +1,3 @@
-const EventEmitter = require('node:events');
 import fs from 'fs';
 import path from 'path';
 
@@ -16,33 +15,42 @@ interface CacheOptions {
     persist?: boolean;
 };
 
+interface CacheManager {
+    base: string;
+    cacheDir: string;
+    cacheInfinitely: boolean;
+    cacheDuration: number;
+    ram: boolean;
+    persist: boolean;
+    memoryCache: { [key: string]: any };
+}
 
-class CacheManager extends EventEmitter {
+
+class CacheManager {
     constructor(options: CacheOptions = {}) {
         options = options || {};
-        super(options);
 
         this.base = path.normalize((options.base || (require.main ? path.dirname(require.main.filename) : undefined) || process.cwd())  + '/cache');
         this.cacheDir = path.normalize(this.base + '/' + (options.name || 'cache'));
         this.cacheInfinitely = !(typeof options.duration === "number");
-        this.cacheDuration = options.duration;
+        this.cacheDuration = options.duration ?? 60 * 60 * 1000;
         this.ram = typeof options.memory == 'boolean' ? options.memory : true;
         this.persist = typeof options.persist == 'boolean' ? options.persist : true;
         if(this.ram) this.memoryCache = {};
         if(this.persist && !exists(this.cacheDir)) fs.mkdirSync(this.cacheDir, { recursive: true });
     }
 
-    private buildFilePath(name: string) {
+    private _buildFilePath(name: string) {
         return path.normalize(this.cacheDir + '/' + name + '.json');
     }
 
-    private buildCacheEntry(data: any) {
+    private _buildCacheEntry(data: any) {
         return { cacheUntil: !this.cacheInfinitely ? new Date().getTime() + this.cacheDuration : undefined, data: data };
     }
 
     putSync(name: string, data: any) {
-        var entry = this.buildCacheEntry(data);
-        if(this.persist) fs.writeFileSync(this.buildFilePath(name), JSON.stringify(entry));
+        var entry = this._buildCacheEntry(data);
+        if(this.persist) fs.writeFileSync(this._buildFilePath(name), JSON.stringify(entry));
         if(this.ram) {
             this.memoryCache[name] = entry;
             this.memoryCache[name].data = JSON.stringify(this.memoryCache[name].data);
@@ -60,7 +68,7 @@ class CacheManager extends EventEmitter {
         };
 
         try {
-            var data = JSON.parse(fs.readFileSync(this.buildFilePath(name), 'utf8'));
+            var data = JSON.parse(fs.readFileSync(this._buildFilePath(name), 'utf8'));
         } catch(e) {
             return undefined;
         };
@@ -74,7 +82,7 @@ class CacheManager extends EventEmitter {
             delete this.memoryCache[name];
             if(!this.persist) return;
         };
-        fs.unlinkSync(this.buildFilePath(name));
+        fs.unlinkSync(this._buildFilePath(name));
     };
 
     unlink(cb?: fs.NoParamCallback) {
@@ -82,13 +90,13 @@ class CacheManager extends EventEmitter {
         typeof cb === 'function' ? cb : function(){}
     };
 
-    private transformFileNameToKey(fileName: string) {
+    private _transformFileNameToKey(fileName: string) {
         return fileName.slice(0, -5);
     };
 
     keysSync() {
         if(this.ram && !this.persist) return Object.keys(this.memoryCache);
-        return fs.readdirSync(this.cacheDir).map(this.transformFileNameToKey);
+        return fs.readdirSync(this.cacheDir).map(this._transformFileNameToKey);
     };
 };
 

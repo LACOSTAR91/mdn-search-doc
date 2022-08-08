@@ -1,17 +1,25 @@
 {
   "name": "search-docs",
-  "version": "0.0.1",
-  "description": "Module permettant de chercher dans la doc MDN, Node.js et Discord.js plus facilement",
+  "version": "0.1.0",
+  "description": "Module permettant de chercher dans la doc MDN, Node.js et Discord.js avec votre code plus facilement",
   "main": "lib/index.js",
   "types": "lib",
   "scripts": {
-    "test": "node test/index.js",
+    "test": "node test",
     "build": "tsc -p .",
     "watch": "tsc -w ."
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/LACOSTAR91/search-docs"
+  },
+  "bugs": {
+    "url": "https://github.com/LACOSTAR91/search-docs/issues"
   },
   "keywords": [
     "mdn",
     "NodeJS",
+    "node.js",
     "discord.js",
     "djs",
     "docs",
@@ -21,8 +29,9 @@
   "author": "LACOSTAR91",
   "license": "CC BY-NC-SA 4.0",
   "dependencies": {
-    "@discordjs/builders": "^0.15.0",
-    "axios": "^0.27.2"
+    "@discordjs/builders": "^1.1.0",
+    "axios": "^0.27.2",
+    "turndown": "^7.1.1"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",

@@ -1,6 +1,8 @@
 const { mdn, nodejs } = require('../lib');
+const axios = require('axios');
 
-nodejs.search('readSync', { version: "v16.x", category: "fs", skip: true }).then(console.log("FS Opérationnel !")).catch(console.log("ERROR: \"FS\" !"));
+nodejs.search('read', { version: "v16.x", category: "fs" }).then(async d => await axios({ method: "POST", url: "https://discord.com/api/v10/channels/740627030860627992/messages", headers: { Authorization: "Bot TOKEN" }, data: { embeds: [nodejs.buildEmbed(d)] } })).catch(console.log("ERROR: \"FS\" !"));
+
 // fsPromises.lchmod - Test DEPRECATED
 // fs.cp - Test stability
 
@@ -11,12 +13,12 @@ nodejs.search('readSync', { version: "v16.x", category: "fs", skip: true }).then
  * @param {string | undefined} lang
  * @returns {Promise<string[]>}
  */
-try {
-    mdn.search(`appearance`, { lang: "css" });
-    console.log("MDN Opérationnel !");
-} catch (e) {
-    console.log("ERROR: \"MDN search\" !")
-}
+// try {
+//     mdn.search(`appearance`, { lang: "css" });
+//     console.log("MDN Opérationnel !");
+// } catch (e) {
+//     console.log("ERROR: \"MDN search\" !")
+// }
 
 /**
  * @name get
@@ -25,4 +27,4 @@ try {
  * @param {string | undefined} lang
  * @returns {Promise<any>}
  */
-mdn.get('appearance', { lang: "css", trad: "fr" }).then(console.log("MDN Opérationnel !")).catch(console.log("ERROR: \"MDN get\" !"));
+// mdn.get('appearance', { lang: "css", trad: "fr" }).then(console.log("MDN Opérationnel !")).catch(console.log("ERROR: \"MDN get\" !"));

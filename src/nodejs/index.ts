@@ -41,12 +41,12 @@ class NodeJS extends CacheManager {
         if(query === undefined || query === null) return Promise.reject(new Error("Search string is required and must be valid"));
 
         const cachedData = this.getSync(`${version}`);        
-        if(cachedData && !skip) return Promise.resolve(this.nodeParse({ doc: cachedData.doc, sourceLinks: cachedData.sourceLinks }, category, query));
+        if(cachedData && !skip) return Promise.resolve(this.nodeParse({ doc: cachedData.doc, sourceLinks: cachedData.sourceLinks }, category, version, query));
         else {
             const sourceLinks = await axios.get(`https://nodejs.org/docs/${version}/apilinks.json`).catch((err: any) => null);
             return axios.get(`https://nodejs.org/docs/${version}/api/all.json`)
             .then((res: any) => {
-                const parsedData = this.nodeParse({ doc: res.data, sourceLinks: sourceLinks?.data ?? null }, category, query);
+                const parsedData = this.nodeParse({ doc: res.data, sourceLinks: sourceLinks?.data ?? null }, category, version, query);
                 this.putSync(`${version}`, { doc: res.data, sourceLinks: sourceLinks?.data ?? null });
                 return Promise.resolve(parsedData);
             }).catch((err: any) => {
@@ -56,7 +56,7 @@ class NodeJS extends CacheManager {
         };
     };
 
-    private async nodeParse(data: { doc: any, sourceLinks: any }, category: string | undefined, query: string): Promise<docsParsed | Error> {
+    private async nodeParse(data: { doc: any, sourceLinks: any }, category: string | undefined, version: string | undefined, query: string): Promise<docsParsed | Error> {
         const module = data.doc.modules.find((module: any) => module.name === category);
         if(!module) throw new Error("Error category not found. Please report this issue to the package owner on Github.");
 
@@ -64,16 +64,19 @@ class NodeJS extends CacheManager {
         
         response["markdown"] = `https://github.com/nodejs/node/blob/main/${module.source}`;
         response["sourceCode"] = /\[lib\/\S+]\((?<source_code>https:\/\/github\.com\/nodejs\/node\/blob\/v\d{1,2}\.\d{1,2}\.\d{1,2}\/lib\/\S+)\)/gm.exec(turndownService.turndown(module.desc))?.groups?.source_code;
+        response["docLink"] = `https://docs.nodejs.org/docs/${version}/api/${module.name}.html`;
         response["name"] = { short: module.name, long: module.textRaw };
         response["introducedIn"] = module.introduced_in;
         response["stability"] = { text: module.stabilityText, number: module.stability };
         response["description"] = turndownService.turndown(module.desc);
         
         let methods: Array<methods> = [];
-
+        
+        // TODO Do for filter use the entire function name (method.textRaw) instead of just the name for better research beetween fsPromises, fs and fsSync functions.
         if(module?.classes) {
             module.classes?.forEach((classe: any) => {
                 const methodsJSON: Array<any> = classe?.methods;
+                
                 if(methodsJSON) {
                     methods.push(...methodsJSON.filter((method: any) => method?.name?.toLowerCase() == query));
                     methods.push(...methodsJSON.filter((method: any) => method?.name?.toLowerCase().startsWith(query)));
@@ -85,6 +88,7 @@ class NodeJS extends CacheManager {
         
         if(module?.methods) {
             const methodsJSON: Array<any> = module?.methods;
+
             methods.push(...methodsJSON.filter((method: any) => method?.name?.toLowerCase() == query));
             methods.push(...methodsJSON.filter((method: any) => method?.name?.toLowerCase().startsWith(query)));
             methods.push(...methodsJSON.filter((method: any) => query.includes(method?.name?.toLowerCase())));  
@@ -94,9 +98,11 @@ class NodeJS extends CacheManager {
             module.modules.forEach((module: any) => {
                 const classesJSON: Array<any> = module?.classes;
                 const methodsJSON: Array<any> = module?.methods;
+
                 if(classesJSON) {
                     classesJSON?.map((classJSON: any) => {
                         const methodsJSON = classJSON?.methods;
+                        
                         if(methodsJSON) {
                             methods.push(...methodsJSON.filter((method: any) => method?.name?.toLowerCase() == query));
                             methods.push(...methodsJSON.filter((method: any) => method?.name?.toLowerCase().startsWith(query)));
@@ -115,9 +121,9 @@ class NodeJS extends CacheManager {
         };
 
         methods = [...new Set(methods)];
-        methods = methods.map((method: any) => { 
+        methods = methods.map((method: any) => {
             return {
-                function: method.textRaw.replaceAll("`", ""),
+                function: method.textRaw?.replaceAll("`", ""),
                 name: method?.name,
                 description: method?.desc ? turndownService.turndown(method?.desc) : "",
                 sourceLink: data?.sourceLinks?.[method?.textRaw?.replaceAll("`", "")?.split("(")?.[0]] ?? null,
@@ -141,13 +147,10 @@ class NodeJS extends CacheManager {
                 }
             }
         })
-        methods = methods.filter(prof => {
-            // Filter results by doing case insensitive match on name here
-            return prof.name.toLowerCase().includes(query);
-        })
+        methods = methods.filter(prof => prof.name.toLowerCase().includes(query))
         .sort((a, b) => {
-            const c = a.name.toLowerCase();
-            const d = b.name.toLowerCase();
+            const c = a.function.toLowerCase();
+            const d = b.function.toLowerCase();
 
             // Sort results by matching name with query position in name
             if(c.indexOf(query) > d.indexOf(query)) return 1;
@@ -162,41 +165,33 @@ class NodeJS extends CacheManager {
         return response;
     }
 
-    // private embedBuilder(data: any) {
-    //     const DocInfo = `${data.Added ? ` - added in ${data.Added}` : ""}${data.Removed ? ` - removed in ${data.Removed}` : ""}${data.Deprecated ? ` - deprecated in ${data.Deprecated}` : ""}`;
-    //     const StabilityText = data.StabilityText;
-    //     let Description = turndownService.turndown(data.Description);
-    //     // const StabilityTextRegEx = /\[(\S+)\]\[\]/gi.exec(StabilityText) || []; // eslint-disable-line no-useless-escape
-    //     const InternalLinkRegEx = /\[(.+)\]\(#(.+)\)/g; // eslint-disable-line no-useless-escape
-    //     const RelativeLinkRegEx = /\[(.+)\]\(([^http].+).html#(\S+)\)/g; // eslint-disable-line no-useless-escape
-    //     const Link = this.nodeGenerateLink(data.Source, data.TextRaw);
-    //     // StabilityTextRegEx.forEach((e, i) => {
-    //     // StabilityText = StabilityText.replace(/\[(\S+)\]\[\]/gi, StabilityTextRegEx[i]); // eslint-disable-line no-useless-escape
-    //     // });
-    //     Description = Description
-    //     .replace(InternalLinkRegEx, `[$1](${data.Source}.html#$2)`)
-    //     .replace(RelativeLinkRegEx, `[$1](https://nodejs.org/api/$2.html#$3)`);
-    
-    //     const Fields = data.Params.map((e: any) => {
-    //       const { name, type, optional, desc } = e;
-    //       return {
-    //         name: `\`${name}\` ${type ? `(\`${type}\`)` : ""}`,
-    //         value: `${optional ? `` : "**REQUIRED** "}${desc || "\u200B"}`,
-    //       };
-    //     });
-    //     const Stability = data.Stability !== undefined && data.Stability < 2 ? `\n**${StabilityText.toUpperCase()}**\n` : ``;
+    buildEmbed(data: docsParsed) {
+        data.methods = data.methods.slice(0,25);
 
-    //     return new EmbedBuilder({ fields: Fields })
-    //     .setTitle(`**__\`${data.TextRaw.slice(0, 190)}\`__${DocInfo}**`)
-    //     .setDescription(`${Stability}${Description.slice(0, 1950)}\u200B`)
-    //     .setURL(data.Link || Link)
-    //     .setAuthor({ name: `NodeJS API`, iconURL: "http://supundharmarathne.files.wordpress.com/2013/08/nodejs.png", url: "https://nodejs.org/api" });
-    // }
+        // TODO Upgrade the function for when only one method is found, he show the only on method with what he returns, stability, etc.
+        return {
+            color: 0x00AE86,
+            author: { name: data.name.short, icon_url: "https://nodejs.org/static/images/logo.png", url: data.sourceCode },
+            url: data.sourceCode,
+            title: `${data.name.long} - Added in ${data.introducedIn} - ${data.stability.text}`,
+            description: `${data.methods.map(m => m?.function ? `- \`${m.function}\`\n` : null)}\n[Source code](${data.sourceCode}) | [Documentation](${data?.docLink})`,
+            // fields: data.methods?.map((method: any) => {
+            //     return {
+            //         name: method.function,
+            //         value: method.description,
+            //         inline: true
+            //     }
+            // }),
+            footer: { text: "Node.js documentation" },
+            timestamp: new Date()
+        }
+    };
 }
 
 interface docsParsed {
     markdown: string;
     sourceCode: string | undefined;
+    docLink: string | undefined;
     name: { short: string, long: string };
     introducedIn: string;
     stability: { text: string, number: number };

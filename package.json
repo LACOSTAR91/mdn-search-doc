@@ -1,6 +1,6 @@
 {
   "name": "search-docs",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Module permettant de chercher dans la doc MDN, Node.js et Discord.js avec votre code plus facilement",
   "main": "lib/index.js",
   "types": "lib",

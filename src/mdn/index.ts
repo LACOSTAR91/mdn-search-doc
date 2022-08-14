@@ -72,6 +72,8 @@ class MDN extends CacheManager {
         });
     };
 
+    // TODO Repare the title and description for CSS, and add others informations complementary
+    // TODO Filter data and parse it for better simplicity of usage
     private fetchMdnJson(url: string, query: string, dataConstant: string): Promise<object | Error> {
         return new Promise(async (resolve, reject) => {
             const JSON = await axios.get(url.replace(/developer.mozilla.org\/.*\/docs/g, "developer.mozilla.org/en-US/docs"));
@@ -92,6 +94,8 @@ class MDN extends CacheManager {
             .catch(err => { reject(new Error(`Error for the query: ${query} (check the trad option is correct)`)) });
         });
     }
+
+    // TODO Add function for build embed 
 }
 
 export default MDN;

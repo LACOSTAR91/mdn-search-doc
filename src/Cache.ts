@@ -30,7 +30,7 @@ class CacheManager {
     constructor(options: CacheOptions = {}) {
         options = options || {};
 
-        this.base = path.normalize((options.base || (require.main ? path.dirname(require.main.filename) : undefined) || process.cwd())  + '/cache');
+        this.base = path.normalize((options.base || (path.dirname(__dirname + "../")) || (require.main ? path.dirname(require.main.filename) : undefined) || process.cwd())  + '/cache');
         this.cacheDir = path.normalize(this.base + '/' + (options.name || 'cache'));
         this.cacheInfinitely = !(typeof options.duration === "number");
         this.cacheDuration = options.duration ?? 60 * 60 * 1000;

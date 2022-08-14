@@ -3,3 +3,5 @@ src/
 .gitignore
 test/
 tsconfig.json
+cache/
+A_check/

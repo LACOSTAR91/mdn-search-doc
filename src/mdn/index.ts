@@ -17,6 +17,7 @@ interface MDNSearchOptions {
 interface MDNGetOptions {
     lang?: "html" | "css" | "js";
     trad?: string;
+    skip: boolean;
 }
 
 class MDN extends CacheManager {
@@ -48,10 +49,10 @@ class MDN extends CacheManager {
                 property.toLowerCase().includes(query.toLowerCase()) ? filtered.push(`${category}#${property}`) : null;
             } 
         });
-        return [...new Set(filtered)];  
+        return [...new Set(filtered)];
     };
-    
-    get (query: string, opts: MDNGetOptions = { lang: "js", trad: "en-US" }): Promise<any> {
+
+    get (query: string, opts: MDNGetOptions = { lang: "js", trad: "en-US", skip: false }): Promise<any> {
         return new Promise(async (resolve, reject) => {
             const result = this.search(query, opts);
             if(!result) reject(new Error(`No result found for the query: ${query}`))
@@ -61,9 +62,8 @@ class MDN extends CacheManager {
 
             const dataConstant = `${category}#${property}#${property2}#${opts.trad}`;
             const url = `${Constants.URL}${opts?.trad}${opts?.lang?.toUpperCase() == "HTML" ? Constants.HTML : opts?.lang?.toUpperCase() == "CSS" ? Constants.CSS : Constants.JS}${opts?.lang?.toUpperCase() == "HTML" ? category == "Global_attributes" ? category : category == "Balise" ? "Element" : `Element/${category}` : category}/${property == undefined && property2 == undefined ? "" : property2 == undefined ? `${property}/` : `${property}/${property2}/`}${Constants.JSON_EXTENSION}`;
-            console.log(url);
             
-            if(this.keysSync().includes(dataConstant)) {
+            if(this.keysSync().includes(dataConstant) && !opts.skip) {
                 const data = this.getSync(dataConstant);
                 if(!data) return resolve(this.fetchMdnJson(url, query, dataConstant));
                 else return resolve(data) 
@@ -85,6 +85,7 @@ class MDN extends CacheManager {
                 data['title'] = regex?.groups?.title.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, "\"").replace(/&amp;/g, "&");
                 data['description'] = regex?.groups?.description;
                 data['url'] = url.slice(0, -Constants.JSON_EXTENSION.length);
+                delete data["isH3"];
                 this.putSync(dataConstant, data);
                 resolve(data);
             })

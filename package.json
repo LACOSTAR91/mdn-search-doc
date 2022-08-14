@@ -1,6 +1,6 @@
 {
   "name": "search-docs",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Module permettant de chercher dans la doc MDN, Node.js et Discord.js avec votre code plus facilement",
   "main": "lib/index.js",
   "types": "lib",
@@ -24,12 +24,12 @@
     "djs",
     "docs",
     "doc",
-    "search"
+    "search",
+    "parse"
   ],
   "author": "LACOSTAR91",
   "license": "CC BY-NC-SA 4.0",
   "dependencies": {
-    "@discordjs/builders": "^1.1.0",
     "axios": "^0.27.2",
     "turndown": "^7.1.1"
   },
